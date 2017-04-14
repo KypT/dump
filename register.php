@@ -5,13 +5,15 @@
     $db = new \PDO ( $conf['dsn'], $conf['user'], $conf['pass'], [
       \PDO::ATTR_PERSISTENT         => true,
       \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-      \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+      \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC
     ]);
 
-    $insertStatement = $db->prepare("insert into leads values(?, ?)");
+    $insertStatement = $db->prepare("insert into leads(name, phone) values(?, ?) returning id");
 
+    $userId = null;
     if (!empty($_POST["username"]) && !empty($_POST["userphone"])) {
       $insertStatement->execute([$_POST["username"], $_POST["userphone"]]);
+      $userId = $insertStatement->fetch()["id"];
     }
 
   } catch (Exception $e) {
@@ -91,6 +93,10 @@
             <input type="text" class="bfh-phone" name="userphone" placeholder="Телефон" required data-format="+7 (ddd) ddd-dd-dd"/>
             <input type="text" placeholder="ФИО" name="username" required/>
             <input type="submit" placeholder="ФИО" value="ХОЧУ КВАДРОКОПТЕР"/>
+            <?php if ($userId): ?>
+              <br>
+              <h4>Спасибо, ваш id: <?php echo $userId; ?></h4>
+            <?php endif; ?>
           </form>
         </div>
       </div>
